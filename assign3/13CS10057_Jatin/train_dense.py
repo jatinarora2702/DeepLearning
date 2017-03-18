@@ -21,12 +21,13 @@ def train(trainX, trainY):
     trainX = trainX.reshape((-1, inpdim))
     
     model = Sequential()
-    model.add(Dense(100, activation='relu', input_dim=inpdim))
+    model.add(Dense(500, activation='relu', input_dim=inpdim))
+    model.add(Dense(500, activation='relu'))
     model.add(Dense(10, activation='softmax'))
     opt = SGD(lr=0.001, decay=0.0)
     model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
-    model.fit(trainX, trainY, epochs=60, batch_size=100)
-    model.save('weights/modelparams.hdf5')
+    model.fit(trainX, trainY, epochs=40, batch_size=100)
+    model.save('weights/modelparams_dense.hdf5')
 
 
 def test(testX):
@@ -34,7 +35,7 @@ def test(testX):
     inpdim = testX.shape[1] * testX.shape[2]
     testX = testX.reshape((-1, inpdim))
     
-    model = load_model('weights/modelparams.hdf5')
+    model = load_model('weights/modelparams_dense.hdf5')
     out = model.predict(testX, batch_size=bsize, verbose=1)
     out = np.argmax(out, axis=1)
     return out

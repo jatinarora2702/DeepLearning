@@ -104,15 +104,15 @@ def main():
     print "\nDigit sample"
     print_digit(trainX[1], trainY[1])
 
-    # train_dense.train(trainX, trainY)
-    # labels = train_dense.test(testX)
-    # accuracy = np.mean((labels == testY)) * 100.0
-    # print "\nDNN Test accuracy: %lf%%" % accuracy
-
-    train_cnn.train(trainX, trainY)
-    labels = train_cnn.test(testX)
+    train_dense.train(trainX, trainY)
+    labels = train_dense.test(testX)
     accuracy = np.mean((labels == testY)) * 100.0
-    print "\nCNN Test accuracy: %lf%%" % accuracy
+    print "\nDNN Test accuracy: %lf%%" % accuracy
+
+    # train_cnn.train(trainX, trainY)
+    # labels = train_cnn.test(testX)
+    # accuracy = np.mean((labels == testY)) * 100.0
+    # print "\nCNN Test accuracy: %lf%%" % accuracy
 
 
 if __name__ == '__main__':

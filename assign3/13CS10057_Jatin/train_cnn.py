@@ -10,14 +10,18 @@ Note: Do not change the function signatures of the train
 and test functions
 '''
 import numpy as np
+import os
 
-from keras.layers import Conv2D, Dense, Flatten, MaxPooling2D 
+from keras.layers import Conv2D, Dense, Dropout, Flatten, MaxPooling2D 
 from keras.models import load_model, Sequential
 from keras.optimizers import SGD
 
 
-def fetch_model():
-    
+def fetch_model(modelfile):
+    if not os.path.exists(modelfile):
+        print 'Downloading model from my github repository ...'
+        os.system('wget -P weights https://raw.github.com/jatinarora2702/DeepLearning/master/assign3/13CS10057_Jatin/weights/modelparams_cnn.hdf5')
+        print 'Download Complete.'
 
 
 def train(trainX, trainY):
@@ -34,8 +38,9 @@ def train(trainX, trainY):
 
 
 def test(testX):
-    fetch_model()
+    fetch_model('weights/modelparams_cnn.hdf5')
     model = load_model('weights/modelparams_cnn.hdf5')
-    out = model.predict(testX, batch_size=10000, verbose=1)
+    bsize = testX.shape[0]
+    out = model.predict(testX, batch_size=bsize, verbose=1)
     out = np.argmax(out, axis=1)
     return out
