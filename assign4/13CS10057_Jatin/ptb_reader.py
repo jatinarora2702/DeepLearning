@@ -56,11 +56,11 @@ def _file_to_word_ids(filename, word_to_id):
   return [word_to_id[word] for word in data]
 
 
-def custom_raw_data(test_path=None):
-  word_to_id = _build_vocab(test_path)
+def custom_raw_data(data_path, test_path):
+  train_path = os.path.join(data_path, "ptb.train.txt")
+  word_to_id = _build_vocab(train_path) 
   test_data = _file_to_word_ids(test_path, word_to_id)
-  vocabulary = len(word_to_id)
-  return test_data, vocabulary
+  return test_data
 
 
 def ptb_raw_data(data_path=None):

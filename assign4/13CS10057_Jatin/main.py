@@ -16,7 +16,7 @@ flags.DEFINE_string('batchsize', 30, 'Mini-batch Size')
 flags.DEFINE_string('numsteps', 20, 'Number of steps of recurrence (size of context window ie. how many words from the history to depend on)')
 flags.DEFINE_string('numlayers', 2, 'Number of LSTM Layers')
 flags.DEFINE_string('vocab_size', 10000, 'Size of vocabulary')
-flags.DEFINE_string('embdim', 100, 'Size of Word Embeddings (hidden size of LSTM Cell, note: 1 LSTM Cell -> 1 Word -> "embdim"-sized embedding vector')
+flags.DEFINE_string('embdim', 200, 'Size of Word Embeddings (hidden size of LSTM Cell, note: 1 LSTM Cell -> 1 Word -> "embdim"-sized embedding vector')
 flags.DEFINE_string('max_norm', 5, 'Max Norm of gradient after which it will be clipped')
 flags.DEFINE_string('max_max_epoch', 10, 'No. of times the LSTM cell state and value are reinitialized and trained on a stream of input')
 flags.DEFINE_string('log_dir', '../lm-logs/', 'Directory for saving logs')
@@ -72,12 +72,8 @@ def runepoch(sess, data, modeldict, fetches, epoch_no, verbose):
 		itercnt = 0
 
 		if verbose: print('Running New Epoch')
-
 		for curr, (x, y) in enumerate(ptb_reader.ptb_iterator(data, flags.batchsize, flags.numsteps)):
 			feed_dict = {modeldict['X']: x, modeldict['Y']: y, modeldict['initial_state']: state}
-			
-			run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
-			run_metadata = tf.RunMetadata()
 			vals = sess.run(fetches, feed_dict)
 			losses += vals['loss'] * flags.numsteps
 			state = vals['final_state']
@@ -100,6 +96,7 @@ def train(train_data):
 		
 		print('Training Started')
 		saver = tf.train.Saver(max_to_keep=1)
+		# saver.restore(sess, 'weights/lstm-langModel')
 		tf.train.write_graph(sess.graph_def, 'weights/', 'lstm-langModel.pb', as_text=False)
 		sess.run(tf.global_variables_initializer())
 		for i in range(flags.max_max_epoch):
@@ -117,17 +114,20 @@ def test(test_data):
 		fetches['final_state'] = m_test['final_state']
 		fetches['loss'] = m_test['loss']		
 		saver = tf.train.Saver(max_to_keep=1)
-		saver.restore(sess, 'weights-11/lstm-langModel')
-		sess.run(tf.global_variables_initializer())
-		p = runepoch(sess, test_data, m_test, fetches, 0, True)
+		saver.restore(sess, 'weights/lstm-langModel')
+		p = runepoch(sess, test_data, m_test, fetches, 0, False)
 		print(p)
 
 
 def download_weights():
 	if not os.path.exists('weights'):
-		print('Downloading model from my github repository ...')
-		os.system('wget -P weights https://raw.github.com/jatinarora2702/DeepLearning/master/assign4/13CS10057_Jatin/weights/')
-		print('Download Complete.')
+		# print('Downloading model from my github repository ...')
+		os.system('wget -P weights https://raw.githubusercontent.com/jatinarora2702/DeepLearning/master/assign4/13CS10057_Jatin/weights/checkpoint')
+		os.system('wget -P weights https://raw.githubusercontent.com/jatinarora2702/DeepLearning/master/assign4/13CS10057_Jatin/weights/lstm-langModel.data-00000-of-00001')
+		os.system('wget -P weights https://raw.githubusercontent.com/jatinarora2702/DeepLearning/master/assign4/13CS10057_Jatin/weights/lstm-langModel.index')
+		os.system('wget -P weights https://raw.githubusercontent.com/jatinarora2702/DeepLearning/master/assign4/13CS10057_Jatin/weights/lstm-langModel.meta')
+		os.system('wget -P weights https://raw.githubusercontent.com/jatinarora2702/DeepLearning/master/assign4/13CS10057_Jatin/weights/lstm-langModel.pb')
+		# print('Download Complete.')
 
 
 def main():
@@ -135,14 +135,14 @@ def main():
 	parser.add_argument("--test", nargs = 1)
 	args = parser.parse_args()
 	try:
-		if len(args.test) > 0:
+		if args.test != None and len(args.test) > 0:
 			test_file = args.test[0]
-			test_data, _ = ptb_reader.custom_raw_data(test_file)
+			test_data = ptb_reader.custom_raw_data(flags.data_dir, test_file)
 			download_weights()
 			test(test_data)
 		else:
 			train_data, valid_data, test_data, train_vocab_size = ptb_reader.ptb_raw_data(flags.data_dir)
-			test(test_data)
+			train(train_data)
 	except:
 		traceback.print_exc()
 		train_data, valid_data, test_data, train_vocab_size = ptb_reader.ptb_raw_data(flags.data_dir)
