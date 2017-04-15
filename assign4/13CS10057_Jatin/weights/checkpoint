@@ -1,2 +1,2 @@
-model_checkpoint_path: "lstm-langModel-checkpoint2"
-all_model_checkpoint_paths: "lstm-langModel-checkpoint2"
+model_checkpoint_path: "lstm-langModel"
+all_model_checkpoint_paths: "lstm-langModel"
